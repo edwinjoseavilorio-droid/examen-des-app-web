@@ -1,12 +1,11 @@
 <template>
   <div>
-    <!-- Título y botón crear -->
     <div class="d-flex justify-content-between align-items-center mb-4">
       <h2 class="fw-bold text-primary">
-        <i class="bi bi-flask me-2"></i>Servicios / Productos
+        <i class="bi bi-flask me-2"></i>Gestión de Servicios
       </h2>
       <button class="btn btn-primary" @click="abrirModalCrear">
-        <i class="bi bi-plus-lg me-2"></i>Nuevo Producto
+        <i class="bi bi-plus-lg me-2"></i>Nuevo Servicio
       </button>
     </div>
 
@@ -20,7 +19,7 @@
     <!-- Loading -->
     <div v-if="cargando" class="text-center py-5">
       <div class="spinner-border text-primary"></div>
-      <p class="mt-2 text-muted">Cargando productos...</p>
+      <p class="mt-2 text-muted">Cargando servicios...</p>
     </div>
 
     <!-- Tabla -->
@@ -30,6 +29,7 @@
           <thead class="table-primary">
             <tr>
               <th>#</th>
+              <th>Imagen</th>
               <th>Nombre</th>
               <th>Descripción</th>
               <th>Precio</th>
@@ -37,25 +37,25 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="producto in productos" :key="producto.id">
-              <td>{{ producto.id }}</td>
+            <tr v-for="(producto, index) in productos" :key="producto.id">
+              <td>{{ index + 1 }}</td>
+              <td>
+                <img :src="producto.image || 'https://via.placeholder.com/60'"
+                  :alt="producto.name"
+                  @error="$event.target.src='https://via.placeholder.com/60'"
+                  style="width:60px;height:60px;object-fit:cover;border-radius:8px;">
+              </td>
               <td>{{ producto.name }}</td>
               <td class="text-muted small">{{ producto.description }}</td>
               <td>{{ Number(producto.price).toLocaleString('es-CO', { style: 'currency', currency: 'COP' }) }}</td>
               <td class="text-center">
-                <!-- Ver detalle -->
-                <button class="btn btn-sm btn-outline-info me-1"
-                  @click="verDetalle(producto)">
+                <button class="btn btn-sm btn-outline-info me-1" @click="verDetalle(producto)">
                   <i class="bi bi-eye"></i>
                 </button>
-                <!-- Editar -->
-                <button class="btn btn-sm btn-outline-primary me-1"
-                  @click="abrirModalEditar(producto)">
+                <button class="btn btn-sm btn-outline-primary me-1" @click="abrirModalEditar(producto)">
                   <i class="bi bi-pencil-fill"></i>
                 </button>
-                <!-- Eliminar -->
-                <button class="btn btn-sm btn-outline-danger"
-                  @click="abrirModalEliminar(producto)">
+                <button class="btn btn-sm btn-outline-danger" @click="abrirModalEliminar(producto)">
                   <i class="bi bi-trash-fill"></i>
                 </button>
               </td>
@@ -65,36 +65,41 @@
       </div>
     </div>
 
-    <!-- ── MODAL CREAR / EDITAR ────────────────────── -->
+    <!-- Modal Crear/Editar -->
     <div v-if="mostrarModal" class="modal-overlay" @click.self="cerrarModal">
       <div class="modal-box card shadow-lg p-4">
         <h5 class="fw-bold text-primary mb-3">
           <i class="bi bi-flask me-2"></i>
-          {{ modoEditar ? 'Editar Producto' : 'Nuevo Producto' }}
+          {{ modoEditar ? 'Editar Servicio' : 'Nuevo Servicio' }}
         </h5>
 
         <div class="mb-3">
           <label class="form-label fw-semibold">Nombre</label>
-          <input v-model="form.name" type="text" class="form-control"
-            placeholder="Nombre del producto" />
+          <input v-model="form.name" type="text" class="form-control" placeholder="Nombre del servicio" />
         </div>
 
         <div class="mb-3">
           <label class="form-label fw-semibold">Descripción</label>
-          <textarea v-model="form.description" class="form-control" rows="3"
-            placeholder="Descripción del producto"></textarea>
+          <textarea v-model="form.description" class="form-control" rows="3" placeholder="Descripción del servicio"></textarea>
         </div>
 
         <div class="mb-3">
           <label class="form-label fw-semibold">Precio (COP)</label>
-          <input v-model="form.price" type="number" class="form-control"
-            placeholder="Ej: 120000" />
+          <input v-model="form.price" type="number" class="form-control" placeholder="Ej: 120000" />
         </div>
 
         <div class="mb-3">
           <label class="form-label fw-semibold">URL de imagen</label>
-          <input v-model="form.image" type="text" class="form-control"
-            placeholder="https://..." />
+          <input v-model="form.image" type="text" class="form-control" placeholder="https://..." />
+        </div>
+
+        <!-- Vista previa de imagen -->
+        <div v-if="form.image" class="mb-3 text-center">
+          <img :src="form.image" alt="Vista previa"
+            @error="$event.target.style.display='none'"
+            @load="$event.target.style.display='block'"
+            style="max-height:180px;max-width:100%;border-radius:8px;object-fit:cover;">
+          <p class="text-muted small mt-1"><i class="bi bi-image me-1"></i>Vista previa</p>
         </div>
 
         <div class="d-flex gap-2 justify-content-end">
@@ -102,28 +107,21 @@
             <i class="bi bi-x-lg me-1"></i>Cancelar
           </button>
           <button class="btn btn-primary" @click="guardarProducto" :disabled="guardando">
-            <span v-if="guardando">
-              <span class="spinner-border spinner-border-sm me-1"></span>
-              Guardando...
-            </span>
-            <span v-else>
-              <i class="bi bi-save me-1"></i>
-              {{ modoEditar ? 'Guardar cambios' : 'Crear producto' }}
-            </span>
+            <span v-if="guardando"><span class="spinner-border spinner-border-sm me-1"></span>Guardando...</span>
+            <span v-else><i class="bi bi-save me-1"></i>{{ modoEditar ? 'Guardar cambios' : 'Crear servicio' }}</span>
           </button>
         </div>
       </div>
     </div>
 
-    <!-- ── MODAL VER DETALLE ───────────────────────── -->
+    <!-- Modal Detalle -->
     <div v-if="mostrarDetalle" class="modal-overlay" @click.self="mostrarDetalle = false">
       <div class="modal-box card shadow-lg p-4">
-        <h5 class="fw-bold text-primary mb-3">
-          <i class="bi bi-eye me-2"></i>Detalle del Producto
-        </h5>
+        <h5 class="fw-bold text-primary mb-3"><i class="bi bi-eye me-2"></i>Detalle del Servicio</h5>
         <img :src="productoDetalle.image || 'https://via.placeholder.com/400x200'"
           :alt="productoDetalle.name" class="w-100 mb-3"
-          style="height: 200px; object-fit: cover; border-radius: 8px;">
+          @error="$event.target.src='https://via.placeholder.com/400x200'"
+          style="height:200px;object-fit:cover;border-radius:8px;">
         <h6 class="fw-bold">{{ productoDetalle.name }}</h6>
         <p class="text-muted">{{ productoDetalle.description }}</p>
         <p class="fw-bold text-success fs-5">
@@ -135,16 +133,14 @@
       </div>
     </div>
 
-    <!-- ── MODAL ELIMINAR ──────────────────────────── -->
+    <!-- Modal Eliminar -->
     <div v-if="mostrarModalEliminar" class="modal-overlay" @click.self="mostrarModalEliminar = false">
       <div class="modal-box card shadow-lg p-4">
         <h5 class="fw-bold text-danger mb-3">
-          <i class="bi bi-exclamation-triangle-fill me-2"></i>
-          Confirmar eliminación
+          <i class="bi bi-exclamation-triangle-fill me-2"></i>Confirmar eliminación
         </h5>
         <p class="text-muted">
-          ¿Estás seguro de eliminar el producto
-          <strong>{{ productoAEliminar?.name }}</strong>?
+          ¿Estás seguro de eliminar el servicio <strong>{{ productoAEliminar?.name }}</strong>?
           Esta acción no se puede deshacer.
         </p>
         <div class="d-flex gap-2 justify-content-end">
@@ -152,13 +148,8 @@
             <i class="bi bi-x-lg me-1"></i>Cancelar
           </button>
           <button class="btn btn-danger" @click="confirmarEliminar" :disabled="guardando">
-            <span v-if="guardando">
-              <span class="spinner-border spinner-border-sm me-1"></span>
-              Eliminando...
-            </span>
-            <span v-else>
-              <i class="bi bi-trash-fill me-1"></i>Eliminar
-            </span>
+            <span v-if="guardando"><span class="spinner-border spinner-border-sm me-1"></span>Eliminando...</span>
+            <span v-else><i class="bi bi-trash-fill me-1"></i>Eliminar</span>
           </button>
         </div>
       </div>
@@ -171,7 +162,6 @@
 import { ref, onMounted } from 'vue'
 import { productosService } from '../services/api.js'
 
-// ── ESTADO ────────────────────────────────────────
 const productos            = ref([])
 const cargando             = ref(false)
 const guardando            = ref(false)
@@ -184,21 +174,18 @@ const productoDetalle      = ref({})
 const alerta               = ref({ mensaje: '', tipo: 'success' })
 const form                 = ref({ id: null, name: '', description: '', price: 0, image: '' })
 
-// ── CARGAR PRODUCTOS ──────────────────────────────
 async function cargarProductos() {
   cargando.value = true
   try {
     const { data } = await productosService.getAll()
     productos.value = data
   } catch (error) {
-    mostrarAlerta('Error al cargar productos', 'danger')
-    console.error(error)
+    mostrarAlerta('Error al cargar servicios', 'danger')
   } finally {
     cargando.value = false
   }
 }
 
-// ── MODALES ───────────────────────────────────────
 function abrirModalCrear() {
   modoEditar.value = false
   form.value = { id: null, name: '', description: '', price: 0, image: '' }
@@ -225,7 +212,6 @@ function cerrarModal() {
   mostrarModal.value = false
 }
 
-// ── GUARDAR (CREAR O EDITAR) ──────────────────────
 async function guardarProducto() {
   if (!form.value.name || !form.value.description || !form.value.price) {
     mostrarAlerta('Por favor completa todos los campos', 'danger')
@@ -235,61 +221,52 @@ async function guardarProducto() {
   try {
     if (modoEditar.value) {
       await productosService.update(form.value.id, form.value)
-      mostrarAlerta('✅ Producto actualizado correctamente', 'success')
+      mostrarAlerta('✅ Servicio actualizado correctamente', 'success')
     } else {
       await productosService.create(form.value)
-      mostrarAlerta('✅ Producto creado correctamente', 'success')
+      mostrarAlerta('✅ Servicio creado correctamente', 'success')
     }
     cerrarModal()
     cargarProductos()
   } catch (error) {
-    mostrarAlerta('❌ Error al guardar el producto', 'danger')
-    console.error(error)
+    mostrarAlerta('❌ Error al guardar el servicio', 'danger')
   } finally {
     guardando.value = false
   }
 }
 
-// ── ELIMINAR ──────────────────────────────────────
 async function confirmarEliminar() {
   guardando.value = true
   try {
     await productosService.delete(productoAEliminar.value.id)
-    mostrarAlerta('✅ Producto eliminado correctamente', 'success')
+    mostrarAlerta('✅ Servicio eliminado correctamente', 'success')
     mostrarModalEliminar.value = false
     cargarProductos()
   } catch (error) {
-    mostrarAlerta('❌ Error al eliminar el producto', 'danger')
-    console.error(error)
+    mostrarAlerta('❌ Error al eliminar el servicio', 'danger')
   } finally {
     guardando.value = false
   }
 }
 
-// ── ALERTA ────────────────────────────────────────
 function mostrarAlerta(mensaje, tipo = 'success') {
   alerta.value = { mensaje, tipo }
   setTimeout(() => { alerta.value.mensaje = '' }, 4000)
 }
 
-// ── INICIO ────────────────────────────────────────
 onMounted(cargarProductos)
 </script>
 
 <style scoped>
 .modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex; align-items: center; justify-content: center;
   z-index: 1000;
 }
 .modal-box {
-  width: 100%;
-  max-width: 520px;
-  background: white;
-  border-radius: 12px;
+  width: 100%; max-width: 520px;
+  background: white; border-radius: 12px;
+  max-height: 90vh; overflow-y: auto;
 }
 </style>
