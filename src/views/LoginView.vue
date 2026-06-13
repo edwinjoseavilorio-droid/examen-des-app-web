@@ -12,47 +12,44 @@
       <form @submit.prevent="handleLogin">
         <div class="mb-3">
           <label class="form-label fw-semibold">
-            <i class="fa-solid fa-user me-1"></i> Usuario
+            <i class="bi bi-person-fill me-1"></i> Usuario
           </label>
-          <input
-            v-model="username"
-            type="text"
-            class="form-control"
-            placeholder="Ingresa tu usuario"
-            required
-            autofocus
-          />
+          <input v-model="username" type="text" class="form-control"
+            placeholder="Ingresa tu usuario" required autofocus />
         </div>
 
         <div class="mb-3">
           <label class="form-label fw-semibold">
-            <i class="fa-solid fa-lock me-1"></i> Contraseña
+            <i class="bi bi-lock-fill me-1"></i> Contraseña
           </label>
-          <input
-            v-model="password"
-            type="password"
-            class="form-control"
-            placeholder="Ingresa tu contraseña"
-            required
-          />
+          <input v-model="password" type="password" class="form-control"
+            placeholder="Ingresa tu contraseña" required />
         </div>
 
-        <button type="submit" class="btn btn-primary w-100 mt-2">
-          <i class="fa-solid fa-right-to-bracket me-2"></i> Entrar
+        <!-- Botón con loading -->
+        <button type="submit" class="btn btn-primary w-100 mt-2" :disabled="cargando">
+          <span v-if="cargando">
+            <span class="spinner-border spinner-border-sm me-2"></span>
+            Verificando...
+          </span>
+          <span v-else>
+            <i class="bi bi-box-arrow-in-right me-2"></i> Entrar
+          </span>
         </button>
 
+        <!-- Alerta de error -->
         <div v-if="errorMsg" class="alert alert-danger mt-3 py-2 small">
-          <i class="fa-solid fa-circle-exclamation me-1"></i> {{ errorMsg }}
+          <i class="bi bi-exclamation-circle-fill me-1"></i> {{ errorMsg }}
         </div>
 
+        <!-- Alerta de éxito -->
         <div v-if="successMsg" class="alert alert-success mt-3 py-2 small">
-          <i class="fa-solid fa-circle-check me-1"></i> {{ successMsg }}
+          <i class="bi bi-check-circle-fill me-1"></i> {{ successMsg }}
         </div>
       </form>
 
       <div class="alert alert-info mt-4 small">
-        <strong>👤 Demo:</strong> admin &nbsp;|&nbsp;
-        <strong>🔑 Contraseña:</strong> 1234<br>
+        <strong>💡 Tip:</strong> Usa cualquier usuario generado en MockAPI<br>
         <span class="text-muted">⚠️ Solo con fines educativos.</span>
       </div>
 
@@ -63,33 +60,48 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import usuarios from '../data/usuarios.json'
+import { usuariosService } from '../services/api.js'
 
-const router = useRouter()
+const router   = useRouter()
 const username = ref('')
 const password = ref('')
-const errorMsg = ref('')
+const errorMsg  = ref('')
 const successMsg = ref('')
+const cargando  = ref(false)
 
-function handleLogin() {
-  errorMsg.value = ''
+async function handleLogin() {
+  errorMsg.value  = ''
   successMsg.value = ''
+  cargando.value  = true
 
-  const user = usuarios.find(
-    u => u.username === username.value && u.password === password.value
-  )
+  try {
+    // Trae todos los usuarios de MockAPI
+    const { data: usuarios } = await usuariosService.getAll()
 
-  if (user) {
-    localStorage.setItem('loggedIn', 'true')
-    localStorage.setItem('nombreUsuario', user.nombre)
-    successMsg.value = '✅ Acceso correcto. Redirigiendo...'
-    setTimeout(() => {
-      router.push('/dashboard')
-    }, 800)
-  } else {
-    errorMsg.value = 'Usuario o contraseña incorrectos'
-    username.value = ''
-    password.value = ''
+    // Busca si existe el usuario con esas credenciales
+    const user = usuarios.find(
+      u => u.username === username.value && u.password === password.value
+    )
+
+    if (user) {
+      // Guarda token simulado y datos del usuario
+      localStorage.setItem('loggedIn', 'true')
+      localStorage.setItem('nombreUsuario', user.name)
+      localStorage.setItem('userId', user.id)
+
+      successMsg.value = '✅ Acceso correcto. Redirigiendo...'
+      setTimeout(() => router.push('/dashboard'), 800)
+    } else {
+      errorMsg.value = 'Usuario o contraseña incorrectos'
+      username.value = ''
+      password.value = ''
+    }
+  } catch (error) {
+    // Error de conexión con la API
+    errorMsg.value = '❌ Error al conectar con el servidor. Intenta de nuevo.'
+    console.error(error)
+  } finally {
+    cargando.value = false
   }
 }
 </script>

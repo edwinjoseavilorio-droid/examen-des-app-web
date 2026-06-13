@@ -3,14 +3,14 @@
     <!-- Título y botón crear -->
     <div class="d-flex justify-content-between align-items-center mb-4">
       <h2 class="fw-bold text-primary">
-        <i class="bi bi-flask me-2"></i>Servicios / Productos
+        <i class="bi bi-people-fill me-2"></i>Usuarios
       </h2>
       <button class="btn btn-primary" @click="abrirModalCrear">
-        <i class="bi bi-plus-lg me-2"></i>Nuevo Producto
+        <i class="bi bi-plus-lg me-2"></i>Nuevo Usuario
       </button>
     </div>
 
-    <!-- Alerta -->
+    <!-- Alerta de éxito o error -->
     <div v-if="alerta.mensaje" :class="`alert alert-${alerta.tipo} alert-dismissible`">
       <i :class="`bi bi-${alerta.tipo === 'success' ? 'check-circle' : 'exclamation-circle'}-fill me-2`"></i>
       {{ alerta.mensaje }}
@@ -20,10 +20,10 @@
     <!-- Loading -->
     <div v-if="cargando" class="text-center py-5">
       <div class="spinner-border text-primary"></div>
-      <p class="mt-2 text-muted">Cargando productos...</p>
+      <p class="mt-2 text-muted">Cargando usuarios...</p>
     </div>
 
-    <!-- Tabla -->
+    <!-- Tabla de usuarios -->
     <div v-else class="card border-0 shadow-sm">
       <div class="card-body p-0">
         <table class="table table-hover mb-0">
@@ -31,31 +31,26 @@
             <tr>
               <th>#</th>
               <th>Nombre</th>
-              <th>Descripción</th>
-              <th>Precio</th>
+              <th>Usuario</th>
+              <th>Email</th>
               <th class="text-center">Acciones</th>
             </tr>
           </thead>
           <tbody>
-            <tr v-for="producto in productos" :key="producto.id">
-              <td>{{ producto.id }}</td>
-              <td>{{ producto.name }}</td>
-              <td class="text-muted small">{{ producto.description }}</td>
-              <td>{{ Number(producto.price).toLocaleString('es-CO', { style: 'currency', currency: 'COP' }) }}</td>
+            <tr v-for="usuario in usuarios" :key="usuario.id">
+              <td>{{ usuario.id }}</td>
+              <td>{{ usuario.name }}</td>
+              <td>{{ usuario.username }}</td>
+              <td>{{ usuario.email }}</td>
               <td class="text-center">
-                <!-- Ver detalle -->
-                <button class="btn btn-sm btn-outline-info me-1"
-                  @click="verDetalle(producto)">
-                  <i class="bi bi-eye"></i>
-                </button>
                 <!-- Editar -->
                 <button class="btn btn-sm btn-outline-primary me-1"
-                  @click="abrirModalEditar(producto)">
+                  @click="abrirModalEditar(usuario)">
                   <i class="bi bi-pencil-fill"></i>
                 </button>
                 <!-- Eliminar -->
                 <button class="btn btn-sm btn-outline-danger"
-                  @click="abrirModalEliminar(producto)">
+                  @click="abrirModalEliminar(usuario)">
                   <i class="bi bi-trash-fill"></i>
                 </button>
               </td>
@@ -69,69 +64,49 @@
     <div v-if="mostrarModal" class="modal-overlay" @click.self="cerrarModal">
       <div class="modal-box card shadow-lg p-4">
         <h5 class="fw-bold text-primary mb-3">
-          <i class="bi bi-flask me-2"></i>
-          {{ modoEditar ? 'Editar Producto' : 'Nuevo Producto' }}
+          <i class="bi bi-person-fill me-2"></i>
+          {{ modoEditar ? 'Editar Usuario' : 'Nuevo Usuario' }}
         </h5>
 
         <div class="mb-3">
-          <label class="form-label fw-semibold">Nombre</label>
+          <label class="form-label fw-semibold">Nombre completo</label>
           <input v-model="form.name" type="text" class="form-control"
-            placeholder="Nombre del producto" />
+            placeholder="Nombre completo" />
         </div>
 
         <div class="mb-3">
-          <label class="form-label fw-semibold">Descripción</label>
-          <textarea v-model="form.description" class="form-control" rows="3"
-            placeholder="Descripción del producto"></textarea>
+          <label class="form-label fw-semibold">Usuario</label>
+          <input v-model="form.username" type="text" class="form-control"
+            placeholder="Nombre de usuario" />
         </div>
 
         <div class="mb-3">
-          <label class="form-label fw-semibold">Precio (COP)</label>
-          <input v-model="form.price" type="number" class="form-control"
-            placeholder="Ej: 120000" />
+          <label class="form-label fw-semibold">Contraseña</label>
+          <input v-model="form.password" type="password" class="form-control"
+            placeholder="Contraseña" />
         </div>
 
         <div class="mb-3">
-          <label class="form-label fw-semibold">URL de imagen</label>
-          <input v-model="form.image" type="text" class="form-control"
-            placeholder="https://..." />
+          <label class="form-label fw-semibold">Email</label>
+          <input v-model="form.email" type="email" class="form-control"
+            placeholder="correo@ejemplo.com" />
         </div>
 
         <div class="d-flex gap-2 justify-content-end">
           <button class="btn btn-secondary" @click="cerrarModal">
             <i class="bi bi-x-lg me-1"></i>Cancelar
           </button>
-          <button class="btn btn-primary" @click="guardarProducto" :disabled="guardando">
+          <button class="btn btn-primary" @click="guardarUsuario" :disabled="guardando">
             <span v-if="guardando">
               <span class="spinner-border spinner-border-sm me-1"></span>
               Guardando...
             </span>
             <span v-else>
               <i class="bi bi-save me-1"></i>
-              {{ modoEditar ? 'Guardar cambios' : 'Crear producto' }}
+              {{ modoEditar ? 'Guardar cambios' : 'Crear usuario' }}
             </span>
           </button>
         </div>
-      </div>
-    </div>
-
-    <!-- ── MODAL VER DETALLE ───────────────────────── -->
-    <div v-if="mostrarDetalle" class="modal-overlay" @click.self="mostrarDetalle = false">
-      <div class="modal-box card shadow-lg p-4">
-        <h5 class="fw-bold text-primary mb-3">
-          <i class="bi bi-eye me-2"></i>Detalle del Producto
-        </h5>
-        <img :src="productoDetalle.image || 'https://via.placeholder.com/400x200'"
-          :alt="productoDetalle.name" class="w-100 mb-3"
-          style="height: 200px; object-fit: cover; border-radius: 8px;">
-        <h6 class="fw-bold">{{ productoDetalle.name }}</h6>
-        <p class="text-muted">{{ productoDetalle.description }}</p>
-        <p class="fw-bold text-success fs-5">
-          {{ Number(productoDetalle.price).toLocaleString('es-CO', { style: 'currency', currency: 'COP' }) }}
-        </p>
-        <button class="btn btn-secondary w-100" @click="mostrarDetalle = false">
-          <i class="bi bi-x-lg me-1"></i>Cerrar
-        </button>
       </div>
     </div>
 
@@ -143,8 +118,8 @@
           Confirmar eliminación
         </h5>
         <p class="text-muted">
-          ¿Estás seguro de eliminar el producto
-          <strong>{{ productoAEliminar?.name }}</strong>?
+          ¿Estás seguro de que deseas eliminar al usuario
+          <strong>{{ usuarioAEliminar?.name }}</strong>?
           Esta acción no se puede deshacer.
         </p>
         <div class="d-flex gap-2 justify-content-end">
@@ -169,29 +144,27 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { productosService } from '../services/api.js'
+import { usuariosService } from '../services/api.js'
 
 // ── ESTADO ────────────────────────────────────────
-const productos            = ref([])
-const cargando             = ref(false)
-const guardando            = ref(false)
-const mostrarModal         = ref(false)
-const mostrarDetalle       = ref(false)
+const usuarios            = ref([])
+const cargando            = ref(false)
+const guardando           = ref(false)
+const mostrarModal        = ref(false)
 const mostrarModalEliminar = ref(false)
-const modoEditar           = ref(false)
-const productoAEliminar    = ref(null)
-const productoDetalle      = ref({})
-const alerta               = ref({ mensaje: '', tipo: 'success' })
-const form                 = ref({ id: null, name: '', description: '', price: 0, image: '' })
+const modoEditar          = ref(false)
+const usuarioAEliminar    = ref(null)
+const alerta              = ref({ mensaje: '', tipo: 'success' })
+const form                = ref({ id: null, name: '', username: '', password: '', email: '' })
 
-// ── CARGAR PRODUCTOS ──────────────────────────────
-async function cargarProductos() {
+// ── CARGAR USUARIOS ───────────────────────────────
+async function cargarUsuarios() {
   cargando.value = true
   try {
-    const { data } = await productosService.getAll()
-    productos.value = data
+    const { data } = await usuariosService.getAll()
+    usuarios.value = data
   } catch (error) {
-    mostrarAlerta('Error al cargar productos', 'danger')
+    mostrarAlerta('Error al cargar usuarios', 'danger')
     console.error(error)
   } finally {
     cargando.value = false
@@ -201,24 +174,19 @@ async function cargarProductos() {
 // ── MODALES ───────────────────────────────────────
 function abrirModalCrear() {
   modoEditar.value = false
-  form.value = { id: null, name: '', description: '', price: 0, image: '' }
+  form.value = { id: null, name: '', username: '', password: '', email: '' }
   mostrarModal.value = true
 }
 
-function abrirModalEditar(producto) {
+function abrirModalEditar(usuario) {
   modoEditar.value = true
-  form.value = { ...producto }
+  form.value = { ...usuario }
   mostrarModal.value = true
 }
 
-function abrirModalEliminar(producto) {
-  productoAEliminar.value = producto
+function abrirModalEliminar(usuario) {
+  usuarioAEliminar.value = usuario
   mostrarModalEliminar.value = true
-}
-
-function verDetalle(producto) {
-  productoDetalle.value = producto
-  mostrarDetalle.value = true
 }
 
 function cerrarModal() {
@@ -226,24 +194,24 @@ function cerrarModal() {
 }
 
 // ── GUARDAR (CREAR O EDITAR) ──────────────────────
-async function guardarProducto() {
-  if (!form.value.name || !form.value.description || !form.value.price) {
+async function guardarUsuario() {
+  if (!form.value.name || !form.value.username || !form.value.password) {
     mostrarAlerta('Por favor completa todos los campos', 'danger')
     return
   }
   guardando.value = true
   try {
     if (modoEditar.value) {
-      await productosService.update(form.value.id, form.value)
-      mostrarAlerta('✅ Producto actualizado correctamente', 'success')
+      await usuariosService.update(form.value.id, form.value)
+      mostrarAlerta('✅ Usuario actualizado correctamente', 'success')
     } else {
-      await productosService.create(form.value)
-      mostrarAlerta('✅ Producto creado correctamente', 'success')
+      await usuariosService.create(form.value)
+      mostrarAlerta('✅ Usuario creado correctamente', 'success')
     }
     cerrarModal()
-    cargarProductos()
+    cargarUsuarios()
   } catch (error) {
-    mostrarAlerta('❌ Error al guardar el producto', 'danger')
+    mostrarAlerta('❌ Error al guardar el usuario', 'danger')
     console.error(error)
   } finally {
     guardando.value = false
@@ -254,12 +222,12 @@ async function guardarProducto() {
 async function confirmarEliminar() {
   guardando.value = true
   try {
-    await productosService.delete(productoAEliminar.value.id)
-    mostrarAlerta('✅ Producto eliminado correctamente', 'success')
+    await usuariosService.delete(usuarioAEliminar.value.id)
+    mostrarAlerta('✅ Usuario eliminado correctamente', 'success')
     mostrarModalEliminar.value = false
-    cargarProductos()
+    cargarUsuarios()
   } catch (error) {
-    mostrarAlerta('❌ Error al eliminar el producto', 'danger')
+    mostrarAlerta('❌ Error al eliminar el usuario', 'danger')
     console.error(error)
   } finally {
     guardando.value = false
@@ -273,7 +241,7 @@ function mostrarAlerta(mensaje, tipo = 'success') {
 }
 
 // ── INICIO ────────────────────────────────────────
-onMounted(cargarProductos)
+onMounted(cargarUsuarios)
 </script>
 
 <style scoped>
@@ -288,7 +256,7 @@ onMounted(cargarProductos)
 }
 .modal-box {
   width: 100%;
-  max-width: 520px;
+  max-width: 500px;
   background: white;
   border-radius: 12px;
 }
