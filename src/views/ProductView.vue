@@ -4,14 +4,14 @@
       <h2 class="fw-bold text-primary">
         <i class="bi bi-flask me-2"></i>Gestión de Servicios
       </h2>
-      <button class="btn btn-primary" @click="abrirModalCrear">
+      <!-- Solo admin puede crear servicios -->
+      <button v-if="isAdmin()" class="btn btn-primary" @click="abrirModalCrear">
         <i class="bi bi-plus-lg me-2"></i>Nuevo Servicio
       </button>
     </div>
 
     <!-- Alerta -->
     <div v-if="alerta.mensaje" :class="`alert alert-${alerta.tipo} alert-dismissible`">
-      <i :class="`bi bi-${alerta.tipo === 'success' ? 'check-circle' : 'exclamation-circle'}-fill me-2`"></i>
       {{ alerta.mensaje }}
       <button type="button" class="btn-close" @click="alerta.mensaje = ''"></button>
     </div>
@@ -25,37 +25,27 @@
     <!-- Tabla -->
     <div v-else class="card border-0 shadow-sm">
       <div class="card-body p-0">
-        <table class="table table-hover mb-0">
+        <table class="table table-hover mb-0 align-middle">
           <thead class="table-primary">
             <tr>
-              <th>#</th>
-              <th>Imagen</th>
+              <th style="width:50px">#</th>
               <th>Nombre</th>
               <th>Descripción</th>
-              <th>Precio</th>
-              <th class="text-center">Acciones</th>
+              <th style="width:140px">Precio</th>
+              <th v-if="isAdmin()" style="width:130px" class="text-center">Acciones</th>
             </tr>
           </thead>
           <tbody>
             <tr v-for="(producto, index) in productos" :key="producto.id">
               <td>{{ index + 1 }}</td>
-              <td>
-                <img :src="producto.image || 'https://via.placeholder.com/60'"
-                  :alt="producto.name"
-                  @error="$event.target.src='https://via.placeholder.com/60'"
-                  style="width:60px;height:60px;object-fit:cover;border-radius:8px;">
-              </td>
-              <td>{{ producto.name }}</td>
+              <td class="fw-semibold">{{ producto.name }}</td>
               <td class="text-muted small">{{ producto.description }}</td>
               <td>{{ Number(producto.price).toLocaleString('es-CO', { style: 'currency', currency: 'COP' }) }}</td>
-              <td class="text-center">
-                <button class="btn btn-sm btn-outline-info me-1" @click="verDetalle(producto)">
-                  <i class="bi bi-eye"></i>
-                </button>
-                <button class="btn btn-sm btn-outline-primary me-1" @click="abrirModalEditar(producto)">
+              <td v-if="isAdmin()" class="text-center">
+                <button class="btn btn-sm btn-outline-primary me-1" @click="abrirModalEditar(producto)" title="Editar">
                   <i class="bi bi-pencil-fill"></i>
                 </button>
-                <button class="btn btn-sm btn-outline-danger" @click="abrirModalEliminar(producto)">
+                <button class="btn btn-sm btn-outline-danger" @click="abrirModalEliminar(producto)" title="Eliminar">
                   <i class="bi bi-trash-fill"></i>
                 </button>
               </td>
@@ -72,28 +62,24 @@
           <i class="bi bi-flask me-2"></i>
           {{ modoEditar ? 'Editar Servicio' : 'Nuevo Servicio' }}
         </h5>
-
         <div class="mb-3">
           <label class="form-label fw-semibold">Nombre</label>
           <input v-model="form.name" type="text" class="form-control" placeholder="Nombre del servicio" />
         </div>
-
         <div class="mb-3">
           <label class="form-label fw-semibold">Descripción</label>
           <textarea v-model="form.description" class="form-control" rows="3" placeholder="Descripción del servicio"></textarea>
         </div>
-
         <div class="mb-3">
           <label class="form-label fw-semibold">Precio (COP)</label>
           <input v-model="form.price" type="number" class="form-control" placeholder="Ej: 120000" />
         </div>
-
         <div class="mb-3">
           <label class="form-label fw-semibold">URL de imagen</label>
           <input v-model="form.image" type="text" class="form-control" placeholder="https://..." />
         </div>
 
-        <!-- Vista previa de imagen -->
+        <!-- Vista previa -->
         <div v-if="form.image" class="mb-3 text-center">
           <img :src="form.image" alt="Vista previa"
             @error="$event.target.style.display='none'"
@@ -118,9 +104,9 @@
     <div v-if="mostrarDetalle" class="modal-overlay" @click.self="mostrarDetalle = false">
       <div class="modal-box card shadow-lg p-4">
         <h5 class="fw-bold text-primary mb-3"><i class="bi bi-eye me-2"></i>Detalle del Servicio</h5>
-        <img :src="productoDetalle.image || 'https://via.placeholder.com/400x200'"
+        <img :src="productoDetalle.image || 'https://via.placeholder.com/480x200'"
           :alt="productoDetalle.name" class="w-100 mb-3"
-          @error="$event.target.src='https://via.placeholder.com/400x200'"
+          @error="$event.target.src='https://via.placeholder.com/480x200'"
           style="height:200px;object-fit:cover;border-radius:8px;">
         <h6 class="fw-bold">{{ productoDetalle.name }}</h6>
         <p class="text-muted">{{ productoDetalle.description }}</p>
@@ -160,6 +146,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import { isAdmin } from '../utils/permissions.js'
 import { productosService } from '../services/api.js'
 
 const productos            = ref([])

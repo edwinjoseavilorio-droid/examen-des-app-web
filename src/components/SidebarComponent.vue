@@ -7,7 +7,8 @@
       <i class="bi bi-house-door-fill me-2"></i> Inicio
     </router-link>
 
-    <router-link to="/dashboard/usuarios" active-class="active">
+    <!-- Solo admin puede ver usuarios -->
+    <router-link v-if="isAdmin()" to="/dashboard/usuarios" active-class="active">
       <i class="bi bi-people-fill me-2"></i> Usuarios
     </router-link>
 
@@ -19,10 +20,6 @@
       <i class="bi bi-person-vcard-fill me-2"></i> Clientes
     </router-link>
 
-    <router-link to="/dashboard/proyectos" active-class="active">
-      <i class="bi bi-briefcase-fill me-2"></i> Proyectos
-    </router-link>
-
     <router-link to="/dashboard/contacto" active-class="active">
       <i class="bi bi-envelope-fill me-2"></i> Contacto
     </router-link>
@@ -31,4 +28,5 @@
 </template>
 
 <script setup>
+import { isAdmin } from '../utils/permissions.js'
 </script>

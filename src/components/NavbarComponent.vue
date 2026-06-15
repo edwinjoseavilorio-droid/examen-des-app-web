@@ -10,10 +10,11 @@
 
       <div class="d-flex align-items-center gap-3 ms-auto">
         <span class="text-white small">
-          <i class="fa-solid fa-user me-1"></i>{{ nombreUsuario }}
+          <i class="bi bi-person-fill me-1"></i>{{ nombreUsuario }}
+          <span v-if="userRole === 'admin'" class="badge bg-warning text-dark ms-2">Admin</span>
         </span>
         <button @click="logout" class="btn btn-outline-light btn-sm">
-          <i class="fa-solid fa-right-from-bracket me-1"></i> Salir
+          <i class="bi bi-box-arrow-right me-1"></i> Salir
         </button>
       </div>
 
@@ -28,10 +29,13 @@ import logoIngeocimyc from '../assets/logo-ingeocimyc.svg'
 
 const router = useRouter()
 const nombreUsuario = ref(localStorage.getItem('nombreUsuario') || 'Usuario')
+const userRole = ref(localStorage.getItem('userRole') || 'usuario')
 
 function logout() {
   localStorage.removeItem('loggedIn')
   localStorage.removeItem('nombreUsuario')
+  localStorage.removeItem('userId')
+  localStorage.removeItem('userRole')
   router.push('/login')
 }
 </script>

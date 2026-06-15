@@ -3,12 +3,16 @@
     "id": 1,
     "username": "admin",
     "password": "1234",
-    "nombre": "Administrador INGEOCIMYC"
+    "name": "Administrador INGEOCIMYC",
+    "email": "admin@ingeocimyc.com",
+    "role": "admin"
   },
   {
     "id": 2,
     "username": "usuario",
     "password": "abcd",
-    "nombre": "Usuario Demo"
+    "name": "Usuario Demo",
+    "email": "usuario@ingeocimyc.com",
+    "role": "usuario"
   }
 ]
