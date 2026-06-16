@@ -9,8 +9,8 @@ una interfaz moderna construida con Vue 3 y Bootstrap 5.
 # Integrantes
 | Nombre | Rol |
 |--------|-----|
-| (Tu nombre aquí) | Desarrollador Frontend |
-| (Nombre compañero) | Desarrollador Frontend |
+| (EDWIN JOSE CONTRERAS 0192648 | Desarrollador Frontend |
+| WALCOTJAKIN GARAY SANGINO 0192600 | Desarrollador Frontend |
 
 # Tecnologías
 - Vue 3 + Vite
