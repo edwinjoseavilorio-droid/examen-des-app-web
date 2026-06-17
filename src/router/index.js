@@ -33,7 +33,7 @@ const router = createRouter({
 
 // Guard de autenticación y autorización
 router.beforeEach((to, from, next) => {
-  const loggedIn = localStorage.getItem('loggedIn') === 'true'
+ const loggedIn = sessionStorage.getItem('loggedIn') === 'true'
 
   // Si no está autenticado y no va a login
   if (to.path !== '/login' && !loggedIn) {

@@ -96,10 +96,9 @@ async function handleLogin() {
 
     if (user) {
       // Guarda token simulado y datos del usuario
-      localStorage.setItem("loggedIn", "true");
-      localStorage.setItem("nombreUsuario", user.name);
-      localStorage.setItem("userId", user.id);
-      localStorage.setItem("userRole", user.role);
+    sessionStorage.setItem("loggedIn", "true");
+    sessionStorage.setItem("nombreUsuario", user.name);
+    sessionStorage.setItem("userRole", user.role);
 
       successMsg.value = "✅ Acceso correcto. Redirigiendo...";
       setTimeout(() => router.push("/dashboard"), 800);

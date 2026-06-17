@@ -11,7 +11,7 @@ export const ROLES = {
  * Obtener rol del usuario actual
  */
 export function getUserRole() {
-  return localStorage.getItem('userRole') || null
+return sessionStorage.getItem('userRole') || null
 }
 
 /**

@@ -28,14 +28,14 @@ import { useRouter } from 'vue-router'
 import logoIngeocimyc from '../assets/logo-ingeocimyc.svg'
 
 const router = useRouter()
-const nombreUsuario = ref(localStorage.getItem('nombreUsuario') || 'Usuario')
-const userRole = ref(localStorage.getItem('userRole') || 'usuario')
+const nombreUsuario = ref(sessionStorage.getItem('nombreUsuario') || 'Usuario')
+const userRole = ref(sessionStorage.getItem('userRole') || 'usuario')
 
 function logout() {
-  localStorage.removeItem('loggedIn')
-  localStorage.removeItem('nombreUsuario')
-  localStorage.removeItem('userId')
-  localStorage.removeItem('userRole')
+  sessionStorage.removeItem('loggedIn')
+  sessionStorage.removeItem('nombreUsuario')
+  sessionStorage.removeItem('userId')
+  sessionStorage.removeItem('userRole')
   router.push('/login')
 }
 </script>
