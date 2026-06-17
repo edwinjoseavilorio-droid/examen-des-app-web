@@ -94,7 +94,7 @@ if (guardados) productos.value = JSON.parse(guardados)
 ---
 
 # Trabajo colaborativo
-- Repositorio: [segundo-parcial-des-app-web](https://github.com/)
+- Repositorio: [examen-des-app-web](https://github.com/)
 - Ramas utilizadas: `main`
 - Evidencia de commits en el historial del repositorio
 
